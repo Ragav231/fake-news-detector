@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% set active = 'intake' %}
+
+{% block content %}
+
+<section class="intake-hero">
+  <p class="dossier-line">Case intake</p>
+  <h1>Submit an article for examination.</h1>
+  <p class="lede">
+    Veritas applies {{ rule_count }} documented rules to the text you provide and
+    returns a written report showing exactly which ones were triggered and why.
+    Every conclusion is traceable to a rule you can read.
+  </p>
+</section>
+
+{% if request.args.get('error') == 'empty' %}
+<p class="alert">Enter the article text before submitting.</p>
+{% endif %}
+
+<form class="intake-form" action="{{ url_for('analyze') }}" method="POST">
+
+  <div class="field">
+    <label for="source">Publisher or source</label>
+    <select id="source" name="source">
+      <option value="" selected>No source provided / forwarded message</option>
+      <optgroup label="Recognised outlets">
+        {% for s in trusted_sources %}<option value="{{ s }}">{{ s|title }}</option>{% endfor %}
+      </optgroup>
+      <optgroup label="Other">
+        <option value="__other__">Other — enter the name manually</option>
+      </optgroup>
+    </select>
+    <p class="hint">Recognised outlets reduce the risk score. Choose "Other" for
+       an unfamiliar site, or leave the first option for forwarded messages.</p>
+
+    <div class="field-nested" id="other-wrap" hidden>
+      <label for="source_other">Name of the source</label>
+      <input type="text" id="source_other" name="source_other" autocomplete="off"
+             placeholder="e.g. Daily Feed, YourNewsWire, a website address">
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="news_text">Article text</label>
+    <textarea id="news_text" name="news_text" rows="11" required
+              placeholder="Paste the headline and body text here."></textarea>
+    <p class="hint">Longer submissions produce a more confident assessment.</p>
+  </div>
+
+  <button type="submit" class="btn-primary">Run examination</button>
+</form>
+
+<section class="method">
+  <h2>How the examination works</h2>
+  <ol class="pipeline">
+    <li><span>Preprocessing</span>Text is normalised and measured — word counts, capitalisation, punctuation, links.</li>
+    <li><span>Rule matching</span>Each of the {{ rule_count }} rules inspects the article independently against the knowledge base.</li>
+    <li><span>Scoring</span>Triggered rules contribute weighted points; evidence of good practice subtracts them.</li>
+    <li><span>Classification</span>The total becomes a risk percentage and a verdict, with the reasoning attached.</li>
+  </ol>
+</section>
+
+<script>
+  // Reveal the free-text field only when "Other" is selected, so the
+  // dropdown stays the primary control but unrecognised sources remain
+  // enterable. Progressive: if scripting is off, the field simply shows.
+  (function () {
+    var select = document.getElementById('source');
+    var wrap = document.getElementById('other-wrap');
+    var input = document.getElementById('source_other');
+
+    function sync() {
+      var isOther = select.value === '__other__';
+      wrap.hidden = !isOther;
+      if (isOther) { input.focus(); } else { input.value = ''; }
+    }
+
+    select.addEventListener('change', sync);
+    sync();
+  })();
+</script>
+
+{% endblock %}

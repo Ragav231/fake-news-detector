@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% set active = 'knowledge' %}
+
+{% block title %}Rule Book — Veritas{% endblock %}
+
+{% block content %}
+
+<section class="intake-hero">
+  <p class="dossier-line">Rule book</p>
+  <h1>Everything the system knows.</h1>
+  <p class="lede">
+    A trained model cannot show you why it decided something. This one can.
+    Below are all {{ rule_count }} active rules and the complete vocabulary
+    they match against.
+  </p>
+</section>
+
+<section class="scoring-explainer">
+  <h2 class="block-title">How scoring works</h2>
+  <p>
+    Each triggered rule contributes weighted points. The total is divided by a
+    practical ceiling of {{ ceiling }} points and expressed as a percentage,
+    capped at 100. Mitigating findings subtract points, so a well-sourced
+    article can score zero.
+  </p>
+  <ul class="threshold-list">
+    <li><span class="chip chip-real">Cleared</span> below {{ threshold_suspicious }}%</li>
+    <li><span class="chip chip-suspicious">Under investigation</span> {{ threshold_suspicious }}–{{ threshold_fake - 1 }}%</li>
+    <li><span class="chip chip-fake">Falsified</span> {{ threshold_fake }}% and above</li>
+  </ul>
+</section>
+
+{% for category, rules in grouped.items() %}
+<section class="rule-group">
+  <h2 class="block-title">{{ category }}</h2>
+  <div class="rule-cards">
+    {% for rule in rules %}
+    <div class="rule-card">
+      <span class="rule-code">{{ rule.id }}</span>
+      <h3>{{ rule.name }}</h3>
+      <p>{{ rule.description }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+<section class="rule-group">
+  <h2 class="block-title">Knowledge base vocabulary</h2>
+  {% for label, items in vocab %}
+  <details class="vocab">
+    <summary>{{ label }} <span class="vocab-count">{{ items|length }}</span></summary>
+    <div class="vocab-items">
+      {% for item in items %}<span class="token">{{ item }}</span>{% endfor %}
+    </div>
+  </details>
+  {% endfor %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — Veritas{% endblock %}
+
+{% block content %}
+<section class="error-page">
+  <p class="error-code">{{ code }}</p>
+  <h1>{{ message }}</h1>
+  <a href="{{ url_for('index') }}" class="btn-primary">Return to case intake</a>
+</section>
+{% endblock %}

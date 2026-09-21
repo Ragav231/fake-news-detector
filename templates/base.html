@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Veritas — Rule-Based News Verification{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<nav class="masthead">
+  <a class="brand" href="{{ url_for('index') }}">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="13" cy="13" r="8.5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <line x1="19.5" y1="19.5" x2="28" y2="28" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <span>Veritas</span>
+  </a>
+  <div class="nav-links">
+    <a href="{{ url_for('index') }}" {% if active == 'intake' %}class="current"{% endif %}>Examine</a>
+    <a href="{{ url_for('knowledge') }}" {% if active == 'knowledge' %}class="current"{% endif %}>Rule Book</a>
+  </div>
+</nav>
+
+<main class="page">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="colophon">
+  <p>Veritas Verification Bureau · Rule-based expert system · No machine learning</p>
+</footer>
+
+</body>
+</html>

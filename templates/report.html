@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% set active = 'report' %}
+{% set v = r.verdict|lower %}
+
+{% block title %}Report {{ r.case_id }} — Veritas{% endblock %}
+
+{% block content %}
+
+<article class="report">
+
+  <header class="report-head">
+    <div class="report-meta">
+      <p class="dossier-line">Examination report</p>
+      <h1>{{ r.headline }}</h1>
+      <p class="ref">{{ r.case_id }} · {{ r.timestamp }}</p>
+    </div>
+    <div class="verdict-stamp stamp-{{ v }}">{{ r.stamp }}</div>
+  </header>
+
+  <!-- Risk meter -->
+  <section class="meter-block">
+    <div class="meter-figures">
+      <span class="risk-number risk-{{ v }}">{{ r.risk }}<span class="pct">%</span></span>
+      <span class="risk-caption">risk score</span>
+    </div>
+
+    <div class="meter-track-wrap">
+      <div class="meter-track">
+        <div class="meter-zone zone-clear" style="width: {{ threshold_suspicious }}%"></div>
+        <div class="meter-zone zone-mid" style="width: {{ threshold_fake - threshold_suspicious }}%"></div>
+        <div class="meter-zone zone-high" style="width: {{ 100 - threshold_fake }}%"></div>
+        <div class="meter-marker" style="left: {{ r.risk }}%"></div>
+      </div>
+      <div class="meter-scale">
+        <span>0 · clear</span>
+        <span>{{ threshold_suspicious }} · needs checking</span>
+        <span>{{ threshold_fake }}+ · unreliable</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Assessment summary -->
+  <section class="summary-block">
+    <h2 class="block-title">Assessment</h2>
+    <p class="summary-text">{{ r.summary }}</p>
+    <dl class="fact-strip">
+      <div><dt>Confidence</dt><dd>{{ r.confidence }}</dd></div>
+      <div><dt>Rules triggered</dt><dd>{{ r.rules_fired }} of {{ r.rules_checked }}</dd></div>
+      <div><dt>Length examined</dt><dd>{{ r.word_count }} words</dd></div>
+      <div><dt>Source given</dt><dd>{{ submitted.source }}</dd></div>
+    </dl>
+  </section>
+
+  <!-- Findings -->
+  <section class="findings-block">
+    <h2 class="block-title">Findings</h2>
+
+    {% if r.findings %}
+    <table class="ledger">
+      <thead>
+        <tr><th>Rule</th><th>Observation</th><th class="num">Points</th></tr>
+      </thead>
+      <tbody>
+        {% for f in r.findings %}
+        <tr class="{% if f.is_mitigating %}row-mitigating{% endif %}">
+          <td class="cell-rule">
+            <span class="rule-code">{{ f.rule_id }}</span>
+            <span class="rule-name">{{ f.name }}</span>
+            <span class="rule-cat">{{ f.category }}</span>
+          </td>
+          <td class="cell-detail">{{ f.detail }}</td>
+          <td class="num cell-points {% if f.is_mitigating %}pts-down{% else %}pts-up{% endif %}">
+            {{ '+' if f.points > 0 else '' }}{{ f.points }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr><td colspan="2">Net weighted score</td><td class="num">{{ r.raw_score }}</td></tr>
+      </tfoot>
+    </table>
+    <p class="ledger-note">
+      Negative points are mitigating findings — evidence of accountable
+      reporting that reduces the risk score.
+    </p>
+    {% else %}
+    <p class="clean-note">No rules were triggered. Nothing in the text matched
+    a known misinformation pattern.</p>
+    {% endif %}
+  </section>
+
+  <!-- Submitted text -->
+  <details class="source-text">
+    <summary>Text examined</summary>
+    <p>{{ submitted.text }}</p>
+  </details>
+
+  <div class="report-actions">
+    <a href="{{ url_for('index') }}" class="btn-primary">Examine another article</a>
+    <button onclick="window.print()" class="btn-ghost">Print report</button>
+    <a href="{{ url_for('knowledge') }}" class="btn-ghost">View rule book</a>
+  </div>
+
+</article>
+
+{% endblock %}
